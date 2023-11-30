@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Optional
 
 import numpy as np
 import torch
@@ -21,10 +21,14 @@ class MoleculeModel(nn.Module):
 
     def __init__(self,
                  num_features: int,
-                 num_elements_per_additional_feature: List[int],# = None,
+                 elements_to_ignore_interaction_between: Optional[List[List[List[int]]]] = None,
+                 elements_to_ignore_internal_interaction: Optional[List[List[int]]] = None,
                  loss_function: nn.MSELoss = nn.MSELoss(reduction="none")):
         """
-        :param num_elements_per_additional_feature: A list of the number of elements in each additional feature set.
+        :param elements_to_ignore_interaction_between: A list of indices indicating the start and end of two subgroup of elements.
+                                                       The interaction of the elements between the two subgroups will be ignored.
+        :param elements_to_ignore_internal_interaction: A list of indices indicating the start and end of a subgroup of elements.
+                                                        The interaction of the elements within the subgroup will be ignored.
         They are used to avoid interactions between the elements within the same feature set during the learning process.
         """
         super(MoleculeModel, self).__init__()
@@ -36,16 +40,15 @@ class MoleculeModel(nn.Module):
         mask = torch.tril(torch.ones(num_features, num_features), diagonal=-1).bool()
         # mask = torch.zeros(num_features, num_features).bool() <- slightly less helpful
 
-        if num_elements_per_additional_feature is not None:
-            print("The interaction for the elements in each of the following subgrop is ignored:")
-            start = end = num_features - sum(num_elements_per_additional_feature)
-            print(f"{start}/{num_features} of features are not frozen...")
-
-            for i in num_elements_per_additional_feature:
-                end = start + i - 1
-                print(f"{start} to {end}")
-                mask[start:end+1, start:end+1] = True
-                start = end + 1
+        if elements_to_ignore_interaction_between is not None:
+            for (range1_start, range1_end), (range2_start, range2_end) in elements_to_ignore_interaction_between:
+                mask[range1_start-1:range1_end, range2_start-1:range2_end] = True
+                mask[range2_start-1:range2_end, range1_start-1:range1_end] = True
+        
+        if elements_to_ignore_internal_interaction is not None:
+            for start, end in elements_to_ignore_internal_interaction:
+                mask[start-1:end, ::] = True
+                mask[::, start-1:end] = True
 
         diagonal_mask = np.eye(num_features, num_features, dtype=bool)
         diagonal_mask = torch.tensor(diagonal_mask)

@@ -3,7 +3,7 @@ import csv
 import json
 import os
 import sys
-from typing import List, Tuple
+from typing import List, Tuple, Optional
 from typing_extensions import Literal
 
 import numpy as np
@@ -35,7 +35,8 @@ def cross_validate(path: str,
                    features_path: List[str] = None,
                    separate_val_features_path: List[str] = None,
                    separate_test_features_path: List[str] = None,
-                   num_elements_per_additional_feature: List[int] = None,
+                   elements_to_ignore_interaction_between: Optional[List[List[List[int]]]] = None,
+                   elements_to_ignore_internal_interaction: Optional[List[List[int]]] = None,
                    smiles_columns: List[str] = None,
                    features_generator: List[str] = None,
                    save_splits: bool = True,
@@ -121,7 +122,8 @@ def cross_validate(path: str,
                                     features_path = features_path,
                                     separate_val_features_path = separate_val_features_path,
                                     separate_test_features_path = separate_test_features_path,
-                                    num_elements_per_additional_feature = num_elements_per_additional_feature,
+                                    elements_to_ignore_interaction_between = elements_to_ignore_interaction_between,
+                                    elements_to_ignore_internal_interaction = elements_to_ignore_internal_interaction,
                                     smiles_columns = smiles_columns,
                                     save_splits = save_splits,
                                     num_workers = num_workers,

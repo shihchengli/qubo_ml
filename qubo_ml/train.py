@@ -7,7 +7,7 @@ import pandas as pd
 import json
 from logging import Logger
 import os
-from typing import Dict, List, Tuple
+from typing import Dict, List, Tuple, Optional
 from typing_extensions import Literal
 
 from tensorboardX import SummaryWriter
@@ -111,7 +111,8 @@ def run_training(data_path: str,
                  features_path: List[str] = None,
                  separate_val_features_path: List[str] = None,
                  separate_test_features_path: List[str] = None,
-                 num_elements_per_additional_feature: List[int] = None,
+                 elements_to_ignore_interaction_between: Optional[List[List[List[int]]]] = None,
+                 elements_to_ignore_internal_interaction: Optional[List[List[int]]] = None,
                  smiles_columns: List[str] = None,
                  save_splits: bool = True,
                  num_workers: int = 8,
@@ -197,10 +198,6 @@ def run_training(data_path: str,
                                                     num_folds=num_folds,
                                                     logger=logger)
 
-    if num_elements_per_additional_feature is not None:
-        for data in [train_data, val_data, test_data]:
-            assert len(data[0].extra_features) == sum(num_elements_per_additional_feature), f"The sum of `num_elements_per_additional_feature`, {sum(num_elements_per_additional_feature)}, should equla to the number of extra features, {len(data[0].extra_features)}."
-
     if save_splits:
         save_smiles_splits(
             data_path=data_path,
@@ -275,7 +272,8 @@ def run_training(data_path: str,
         # Load/build model
         debug(f'Building model {model_idx}')
         model = MoleculeModel(num_features=len(data[0].features),
-                              num_elements_per_additional_feature=num_elements_per_additional_feature,
+                              elements_to_ignore_interaction_between=elements_to_ignore_interaction_between,
+                              elements_to_ignore_internal_interaction=elements_to_ignore_internal_interaction,
                               loss_function=loss_function)
         debug(model)
         debug(f'Number of parameters = {param_count_all(model):,}')
@@ -339,7 +337,7 @@ def run_training(data_path: str,
         info(f'Model {model_idx} best validation {main_metric} = {best_score:.6f} on epoch {best_epoch}')
         model = load_checkpoint(os.path.join(model_save_dir, MODEL_FILE_NAME),
                                 num_features=len(data[0].features),
-                                num_elements_per_additional_feature=num_elements_per_additional_feature,
+                                elements_to_ignore_interaction_between=elements_to_ignore_interaction_between,
                                 loss_function=loss_function,
                                 device=device,
                                 logger=logger)

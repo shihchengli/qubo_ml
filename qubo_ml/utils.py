@@ -3,7 +3,7 @@ import logging
 import os
 import pickle
 import re
-from typing import Callable, List, Union
+from typing import Callable, List, Union, Optional
 
 import torch
 import torch.nn as nn
@@ -274,7 +274,8 @@ def multitask_mean(
 def load_checkpoint(
     path: str,
     num_features: int,
-    num_elements_per_additional_feature: List[int] = None,
+    elements_to_ignore_interaction_between: Optional[List[List[List[int]]]] = None,
+    elements_to_ignore_internal_interaction: Optional[List[List[int]]] = None,
     loss_function=nn.MSELoss(reduction="none"),
     device: torch.device = None,
     logger: logging.Logger = None
@@ -297,19 +298,14 @@ def load_checkpoint(
     loaded_state_dict = state["state_dict"]
 
     # Build model
-    model = MoleculeModel(num_features, num_elements_per_additional_feature, loss_function)
+    model = MoleculeModel(num_features, elements_to_ignore_interaction_between, elements_to_ignore_internal_interaction, loss_function)
     model_state_dict = model.state_dict()
 
     # Skip missing parameters and parameters of mismatched size
     pretrained_state_dict = {}
     for loaded_param_name in loaded_state_dict.keys():
         # Backward compatibility for parameter names
-        if re.match(r"(encoder\.encoder\.)([Wc])", loaded_param_name) and not args.reaction_solvent:
-            param_name = loaded_param_name.replace("encoder.encoder", "encoder.encoder.0")
-        elif re.match(r"(^ffn)", loaded_param_name):
-            param_name = loaded_param_name.replace("ffn", "readout")
-        else:
-            param_name = loaded_param_name
+        param_name = loaded_param_name
 
         # Load pretrained parameter, skipping unmatched parameters
         if param_name not in model_state_dict:
