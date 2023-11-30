@@ -22,6 +22,7 @@ from .evaluate import evaluate, evaluate_predictions
 from .predict import predict
 from .data.utils import get_data, split_data
 from .utils import param_count_all, build_optimizer, load_checkpoint, makedirs, save_checkpoint, save_smiles_splits, multitask_mean
+from .loss_functions import bounded_mse_loss
 
 MODEL_FILE_NAME = 'model.pt'
 
@@ -56,8 +57,9 @@ def train(
     for batch in tqdm(data_loader, total=len(data_loader), leave=False):
         # Prepare batch
         batch: MoleculeDataset
-        features_batch, target_batch = batch.features(), batch.targets()
+        features_batch, target_batch, limit_batch = batch.features(), batch.targets(), batch.limits()
         targets = torch.tensor([[0 if x is None else x for x in tb] for tb in target_batch])  # shape(batch, tasks)
+        limits = torch.tensor([[[0, 100] if x is None else x for x in lb] for lb in limit_batch])  # shape(batch, tasks, 2)
 
         # Run model
         model.zero_grad()
@@ -65,9 +67,16 @@ def train(
 
         # Move tensors to correct device
         targets = targets.to(torch_device)
+        limits = limits.to(torch_device)
 
         # Calculate losses
-        loss = loss_func(preds, targets)
+        if loss_func == nn.MSELoss(reduction="none"):
+            loss = loss_func(preds, targets)
+        elif loss_func == bounded_mse_loss:
+            loss = loss_func(preds, targets, limits)
+        else:
+            raise ValueError("Loss function not supported.")
+
         loss = loss.sum()
         loss_sum += loss.item()
         iter_count += 1
@@ -231,9 +240,6 @@ def run_training(data_path: str,
     debug('Fitting scaler')
     scaler = train_data.normalize_targets()
 
-    # Get loss function
-    loss_func = nn.MSELoss(reduction="none")
-
     # Set up test set evaluation
     test_smiles, test_targets = test_data.smiles(), test_data.targets()
     each_test_preds = np.zeros((len(test_smiles), num_tasks, ensemble_size))
@@ -301,7 +307,7 @@ def run_training(data_path: str,
             n_iter = train(
                 model=model,
                 data_loader=train_data_loader,
-                loss_func=loss_func,
+                loss_func=loss_function,
                 optimizer=optimizer,
                 n_iter=n_iter,
                 logger=logger,

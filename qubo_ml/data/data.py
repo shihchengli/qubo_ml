@@ -60,7 +60,8 @@ class MoleculeDatapoint:
                  extra_features: np.ndarray = None,
                  features_generator: List[str] = None,
                  is_reaction: bool = None,
-                 reaction_mode: str = None):
+                 reaction_mode: str = None,
+                 limits: List[Optional[float]] = [0, 100]):
         """
         :param smiles: A list of the SMILES strings for the molecules.
         :param targets: A list of targets for the molecule.
@@ -73,6 +74,7 @@ class MoleculeDatapoint:
         self.features_generator = features_generator
         self.is_reaction = is_reaction
         self.reaction_mode = reaction_mode
+        self.limits = limits
 
         # Generate additional features if given a generator
         self.features = []
@@ -127,8 +129,8 @@ class MoleculeDatapoint:
 
         self.features = np.array(self.features)
 
-        # Save a copy of the raw features and targets to enable different scaling later on
-        self.raw_features, self.raw_targets = self.features, self.targets
+        # Save a copy of the raw features, targets, and limits to enable different scaling later on
+        self.raw_features, self.raw_targets, self.raw_limits = self.features, self.targets, self.limits
 
     @property
     def mol(self) -> List[Union[Chem.Mol, Tuple[Chem.Mol, Chem.Mol]]]:
@@ -173,9 +175,17 @@ class MoleculeDatapoint:
         """
         self.targets = targets
 
-    def reset_features_and_targets(self) -> None:
-        """Resets the features and targets to their raw values."""
-        self.features, self.targets = self.raw_features, self.raw_targets
+    def set_limits(self, limits: List[Optional[float]]):
+        """
+        Sets the limits of a molecule.
+
+        :param limits: A list of floats containing the limits.
+        """
+        self.limits = limits
+
+    def reset_features_targets_and_limits(self) -> None:
+        """Resets the features, targets, and limits to their raw values."""
+        self.features, self.targets, self.limits = self.raw_features, self.raw_targets, self.raw_limits
 
 
 class MoleculeDataset(Dataset):
@@ -251,6 +261,14 @@ class MoleculeDataset(Dataset):
         """
         return [d.targets for d in self._data]
 
+    def limits(self) -> List[List[Optional[float]]]:
+        """
+        Returns the limits associated with each molecule.
+
+        :return: A list of lists of floats (or None) containing the limits.
+        """
+        return [d.limits for d in self._data]
+
     def features_size(self) -> int:
         """
         Returns the size of the additional features vector associated with the molecules.
@@ -272,6 +290,11 @@ class MoleculeDataset(Dataset):
         scaled_targets = scaler.transform(targets).tolist()
         self.set_targets(scaled_targets)
 
+        for i, limit in enumerate(self.limits()):
+            if limit is not None:
+                scaled_limits = scaler.transform(limit).tolist()
+                self._data[i].set_limits(scaled_limits)
+
         return scaler
 
     def set_targets(self, targets: List[List[Optional[float]]]) -> None:
@@ -289,10 +312,10 @@ class MoleculeDataset(Dataset):
         for i in range(len(self._data)):
             self._data[i].set_targets(targets[i])
 
-    def reset_features_and_targets(self) -> None:
-        """Resets the features (atom, bond, and molecule) and targets to their raw values."""
+    def reset_features_targets_and_limits(self) -> None:
+        """Resets the features (atom, bond, and molecule), targets, and limits to their raw values."""
         for d in self._data:
-            d.reset_features_and_targets()
+            d.reset_features_targets_and_limits()
 
     def __len__(self) -> int:
         """

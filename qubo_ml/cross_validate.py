@@ -98,7 +98,7 @@ def cross_validate(path: str,
         seed = init_seed + fold_num
         tmp_save_dir = os.path.join(save_dir, f'fold_{fold_num}')
         makedirs(tmp_save_dir)
-        data.reset_features_and_targets()
+        data.reset_features_targets_and_limits()
 
         # If resuming experiment, load results from trained models
         test_scores_path = os.path.join(tmp_save_dir, 'test_scores.json')
