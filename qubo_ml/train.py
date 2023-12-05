@@ -70,7 +70,7 @@ def train(
         limits = limits.to(torch_device)
 
         # Calculate losses
-        if loss_func == nn.MSELoss(reduction="none"):
+        if isinstance(loss_func, nn.MSELoss):
             loss = loss_func(preds, targets)
         elif loss_func == bounded_mse_loss:
             loss = loss_func(preds, targets, limits)
