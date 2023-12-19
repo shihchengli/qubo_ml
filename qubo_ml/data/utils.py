@@ -104,6 +104,7 @@ def get_data(path: str,
              features_generator: List[str] = None,
              is_reaction: bool = False,
              reaction_mode: str = None,
+             num_bits: int = None,
              logger: Logger = None) -> MoleculeDataset:
     """
     Gets SMILES and target values from a CSV file.
@@ -167,6 +168,7 @@ def get_data(path: str,
                 extra_features=all_features[i] if features_data is not None else None,
                 is_reaction=is_reaction,
                 reaction_mode=reaction_mode,
+                num_bits=num_bits,
             ) for i, (smiles, targets) in tqdm(enumerate(zip(all_smiles, all_targets)),
                                             total=len(all_smiles))
         ])

@@ -105,6 +105,7 @@ def run_training(data_path: str,
                  separate_val_path: str = None,
                  separate_test_path: str = None,
                  features_generator: List[str] = None,
+                 num_bits: int = None,
                  seed: int = 0,
                  pytorch_seed: int = 0,
                  split_type: str = 'random',
@@ -165,6 +166,7 @@ def run_training(data_path: str,
             features_generator=features_generator,
             is_reaction=is_reaction,
             reaction_mode=reaction_mode,
+            num_bits=num_bits,
             logger=logger,
         )
 
@@ -177,6 +179,7 @@ def run_training(data_path: str,
             features_generator=features_generator,
             is_reaction=is_reaction,
             reaction_mode=reaction_mode,
+            num_bits=num_bits,
             logger=logger,
         )
 

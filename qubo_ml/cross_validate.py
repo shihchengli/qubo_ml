@@ -39,6 +39,7 @@ def cross_validate(path: str,
                    elements_to_ignore_internal_interaction: Optional[List[List[int]]] = None,
                    smiles_columns: List[str] = None,
                    features_generator: List[str] = None,
+                   num_bits: int = None,
                    save_splits: bool = True,
                    num_workers: int = 8,
                    no_cuda: bool = False,
@@ -71,6 +72,10 @@ def cross_validate(path: str,
     else:
         debug = info = print
 
+    # Check args
+    if features_generator is not None and num_bits is None:
+        raise ValueError('Must specify `num_bits` when features_generator is not None.')
+
     # Initialize relevant variables
     init_seed = seed
 
@@ -88,6 +93,7 @@ def cross_validate(path: str,
         features_generator=features_generator,
         is_reaction=is_reaction,
         reaction_mode=reaction_mode,
+        num_bits=num_bits,
         logger=logger,
     )
 
@@ -107,6 +113,7 @@ def cross_validate(path: str,
                                     separate_val_path = separate_val_path,
                                     separate_test_path = separate_test_path,
                                     features_generator = features_generator,
+                                    num_bits=num_bits,
                                     seed = seed,
                                     pytorch_seed = pytorch_seed,
                                     split_type = split_type,

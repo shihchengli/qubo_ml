@@ -61,7 +61,8 @@ class MoleculeDatapoint:
                  features_generator: List[str] = None,
                  is_reaction: bool = None,
                  reaction_mode: str = None,
-                 limits: List[Optional[float]] = [0, 100]):
+                 limits: List[Optional[float]] = [0, 100],
+                 num_bits: int = None):
         """
         :param smiles: A list of the SMILES strings for the molecules.
         :param targets: A list of targets for the molecule.
@@ -81,7 +82,7 @@ class MoleculeDatapoint:
         r_features, p_features = [], []
         if self.features_generator is not None:
             for fg in self.features_generator:
-                features_generator = get_features_generator(fg)
+                features_generator = get_features_generator(fg, num_bits)
                 if not self.is_reaction:
                     for m in self.mol:
                         if m is not None and m.GetNumHeavyAtoms() > 0:
