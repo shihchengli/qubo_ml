@@ -14,7 +14,7 @@ from rdkit.Chem.Scaffolds import MurckoScaffold
 import numpy as np
 from tqdm import tqdm
 
-from .data import MoleculeDatapoint, MoleculeDataset, make_mol
+from qubo_ml.data.data import MoleculeDatapoint, MoleculeDataset, make_mol
 
 def get_header(path: str) -> List[str]:
     """
