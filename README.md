@@ -4,7 +4,7 @@
 The repository contains all of the code and instructions needed to reproduce the experiments and results of **[Application of the Digital Annealer Unit in Optimizing Chemical Reaction Conditions for Enhanced Production Yields](https://arxiv.org/abs/2407.17485)**.
 
 # Installation
-```python
+```
 git clone https://github.com/shihchengli/qubo_ml.git
 cd qubo_ml
 conda env create -f environment.yml
