@@ -1,11 +1,9 @@
-import os
-
 import chemprop
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 import pandas as pd
 from matplotlib.offsetbox import AnchoredText
-from sklearn.metrics import mean_absolute_error, mean_squared_error
+from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 
 mpl.use("tkagg")
 
@@ -19,6 +17,7 @@ def plot_parity(
 
     mae = mean_absolute_error(y_true, y_pred)
     rmse = mean_squared_error(y_true, y_pred, squared=False)
+    r2 = r2_score(y_true, y_pred)
 
     plt.plot([axmin, axmax], [axmin, axmax], "--k")
     if error_bar:
@@ -44,7 +43,7 @@ def plot_parity(
 
     # Add a text box with MAE and RMSE values
     at = AnchoredText(
-        f"MAE = {mae:.2f}\nRMSE = {rmse:.2f}",
+        f"MAE = {mae:.2f}\nRMSE = {rmse:.2f}\nr2_score = {r2:.2f}",
         prop=dict(size=10),
         frameon=True,
         loc="upper left",
@@ -64,73 +63,13 @@ def plot_parity(
     return
 
 
-data_path = "../../../data"
-
-features_set = [
-    "*Cl",
-    "*Br",
-    "*I",
-    "*OC",
-    "*CC",
-    "*c1ccccn1",
-    "*c1cccnc1",
-    "*C(F)(F)F",
-    "P2Et",
-    "BTMG",
-    "MTBD",
-    "XPhos",
-    "tBuXPhos",
-    "tBuBrettPhos",
-    "AdBrettPhos",
-    "a1",
-    "a2",
-    "a3",
-    "a4",
-    "a5",
-    "a6",
-    "a7",
-    "a8",
-    "a9",
-    "a10",
-    "a11",
-    "a12",
-    "a13",
-    "a14",
-    "a15",
-    "a16",
-    "a17",
-    "a18",
-    "a19",
-    "a20",
-]
-
-all_sets = ["s1", "s3", "s7", "s9"]
-for i in range(len(all_sets)):
-    test_set = [all_sets[i]]
-    train_set = all_sets[:i] + all_sets[i + 1 :]
-
-    save_dir = "./" + "".join(train_set) + "_" + test_set[0] + "_ffn"
-    os.makedirs(save_dir, exist_ok=True)
-
-    # Prepare data
-    df = pd.read_csv(f"{data_path}/cn-processed/cn-processed_features.csv", index_col=0)
-
-    # train set
-    train_df = df[df["substrate_id"].isin(train_set)]
-    train_df.to_csv(f"{save_dir}/train.csv")
-    train_df[features_set].to_csv(f"{save_dir}/train_features.csv", index=False)
-
-    # test set
-    test_df = df[df["substrate_id"].isin(test_set)]
-    test_df.to_csv(f"{save_dir}/test.csv")
-    test_df[features_set].to_csv(f"{save_dir}/test_features.csv", index=False)
-
-    # Run the model
+data_path = "../../../data/cn-processed/subsets"
+model_type = "ffn"
+for split in ["s1", "s3", "s7", "s9"]:
+    save_dir = f"{model_type}/{split}"
     arguments = [
         "--data_path",
-        f"{save_dir}/train.csv",
-        "--separate_test_path",
-        f"{save_dir}/test.csv",
+        f"{data_path}/{split}/{split}_all.csv",
         "--dataset_type",
         "regression",
         "--seed",
@@ -144,7 +83,7 @@ for i in range(len(all_sets)):
         "--batch_size",
         "5",
         "--epochs",
-        "50",
+        "200",
         "--init_lr",
         "1e-3",
         "--max_lr",
@@ -156,9 +95,7 @@ for i in range(len(all_sets)):
         "--target_columns",
         "yield",
         "--features_path",
-        f"{save_dir}/train_features.csv",
-        "--separate_test_features_path",
-        f"{save_dir}/test_features.csv",
+        f"{data_path}/{split}/{split}_all_features.csv",
         "--smiles_columns",
         "substrate_smiles",
         "--metric",
@@ -182,4 +119,4 @@ for i in range(len(all_sets)):
     y_true = pd.read_csv(f"{save_dir}/fold_0/test_full.csv")["yield"].tolist()
     y_pred = pd.read_csv(f"{save_dir}/fold_0/test_preds.csv")["yield"].tolist()
     file_name = f"{save_dir}/parity_plot.svg"
-    plot_parity(y_true, y_pred, title=test_set[0], file_name=file_name)
+    plot_parity(y_true, y_pred, title=split, file_name=file_name)

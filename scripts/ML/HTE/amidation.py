@@ -2,11 +2,11 @@ import pandas as pd
 import torch.nn as nn
 from qubo_ml.cross_validate import cross_validate
 
-from scripts.plot import plot_parity
+from scripts.ML.plot import plot_parity
 
-data_path = "../../data"
-split = "aryl-scope-ligand"
-save_dir = "./arylation"
+data_path = "../../../data"
+split = "amidation"
+save_dir = "./amidation"
 cross_validate(
     path=f"{data_path}/{split}/{split}_features.csv",
     seed=0,
@@ -39,4 +39,4 @@ cross_validate(
 y_true = pd.read_csv(f"{save_dir}/fold_0/test_full.csv")["yield"].tolist()
 y_pred = pd.read_csv(f"{save_dir}/fold_0/test_preds.csv")["yield"].tolist()
 file_name = f"{save_dir}/parity_plot.svg"
-plot_parity(y_true, y_pred, title="C–H arylation", file_name=file_name)
+plot_parity(y_true, y_pred, title=split, file_name=file_name)

@@ -6,7 +6,7 @@ import pandas as pd
 import torch.nn as nn
 from qubo_ml.cross_validate import cross_validate
 
-from scripts.plot import plot_parity_train_test
+from scripts.ML.plot import plot_parity_train_test
 
 data_path = "../data/cn-processed"
 active_learning_methods = ["top_prediction", "random"]

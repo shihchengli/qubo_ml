@@ -4,9 +4,9 @@ import pandas as pd
 import torch.nn as nn
 from qubo_ml.cross_validate import cross_validate
 
-from scripts.plot import plot_parity
+from scripts.ML.plot import plot_parity
 
-data_path = "../../../data"
+data_path = "../../../../data"
 
 features_set = [
     "*Cl",

@@ -3,7 +3,8 @@ import os
 import pandas as pd
 import torch.nn as nn
 from qubo_ml.cross_validate import cross_validate
-from scripts.plot import plot_parity
+
+from scripts.ML.plot import plot_parity
 
 data_set = "buchwald"  # change this to the other dataset (e.g., negishi, suzuki)
 features_generators = ["MACCS", "Avalon", "ECFP4"]

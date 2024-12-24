@@ -2,11 +2,11 @@ import pandas as pd
 import torch.nn as nn
 from qubo_ml.cross_validate import cross_validate
 
-from scripts.plot import plot_parity
+from scripts.ML.plot import plot_parity
 
-data_path = "../../data"
-split = "deoxyf"
-save_dir = "./deoxyf"
+data_path = "../../../data"
+split = "aryl-scope-ligand"
+save_dir = "./arylation"
 cross_validate(
     path=f"{data_path}/{split}/{split}_features.csv",
     seed=0,
@@ -21,7 +21,7 @@ cross_validate(
     task_names=["yield"],
     num_tasks=1,
     features_path=[f"{data_path}/{split}/features.csv"],
-    smiles_columns=["substrate_smiles"],
+    smiles_columns=["nucleophile_smiles"],
     features_generator=None,
     save_splits=True,
     num_workers=0,
@@ -39,4 +39,4 @@ cross_validate(
 y_true = pd.read_csv(f"{save_dir}/fold_0/test_full.csv")["yield"].tolist()
 y_pred = pd.read_csv(f"{save_dir}/fold_0/test_preds.csv")["yield"].tolist()
 file_name = f"{save_dir}/parity_plot.svg"
-plot_parity(y_true, y_pred, title="deoxyfluorination", file_name=file_name)
+plot_parity(y_true, y_pred, title="C–H arylation", file_name=file_name)

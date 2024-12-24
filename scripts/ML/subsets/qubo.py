@@ -2,9 +2,9 @@ import pandas as pd
 import torch.nn as nn
 from qubo_ml.cross_validate import cross_validate
 
-from scripts.plot import plot_parity
+from scripts.ML.plot import plot_parity
 
-data_path = "../../data/cn-processed/subsets"
+data_path = "../../../data/cn-processed/subsets"
 for split in ["s1", "s3", "s7", "s9"]:
     save_dir = split
     cross_validate(
