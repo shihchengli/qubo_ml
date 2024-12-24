@@ -15,7 +15,7 @@ conda activate qubo_ml
 **Tip 2:** if you plan to use GPU, make sure you have the correct pytorch version with GPU support
 
 # How to train a ML-based QUBO model?
-We only support using Python scripts to train models. More examples can be found in the [scripts](https://github.com/shihchengli/qubo_ml/tree/main/scripts) folder.
+We only support using Python scripts to train models. More examples can be found in the [scripts/ML](https://github.com/shihchengli/qubo_ml/tree/main/scripts/ML) folder.
 ```python
 from qubo_ml.cross_validate import cross_validate
 
@@ -46,6 +46,10 @@ cross_validate(
     quiet=False  # Skip non-essential print statements.
 )
 ```
+# How to train a DAU-based QUBO model?
+
+The script we used for this work is located in the [scripts/DAU](https://github.com/shihchengli/qubo_ml/tree/main/scripts/DAU) folder. The Python code specifies several requirements, including preparing files in a specified format and changing the current directory to the dataset's location.
+
 
 # Relationship to Chemprop
 I ([@shihchengli](https://github.com/shihchengli)) am also a developer of Chemprop, so I adopted most of the code from Chemprop. It allows users to benchmark the performance of the DAU-based model against other baselines (e.g., FFN, SVM, random forest) and the D-MPNN implemented in Chemprop.
