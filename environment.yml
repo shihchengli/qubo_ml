@@ -21,6 +21,7 @@ dependencies:
   - tensorboardX>=2.0
   - torchvision>=0.5.0
   - tqdm>=4.45.0
+  - chemprop=1.7.1
   - pip:
     - typed-argument-parser>=1.6.1
     - git+https://github.com/bp-kelley/descriptastorus
