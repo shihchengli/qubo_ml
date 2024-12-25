@@ -10,7 +10,7 @@ cd qubo_ml
 conda env create -f environment.yml
 conda activate qubo_ml
 ```
-**Tip 1:** mamba might be faster: https://mamba.readthedocs.io/en/latest/installation.html
+**Tip 1:** mamba might be faster: try running `conda install -c conda-forge mamba` and then replacing `conda` with `mamba` in each of the steps above.
 
 **Tip 2:** if you plan to use GPU, make sure you have the correct pytorch version with GPU support
 
